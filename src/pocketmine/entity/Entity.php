@@ -426,11 +426,14 @@ abstract class Entity extends Location implements Metadatable {
 		$this->id = Entity::$entityCount++;
 		$this->justCreated = true;
 		$this->namedtag = $nbt;
-
-		$this->chunk = $level->getChunk($this->namedtag["Pos"][0] >> 4, $this->namedtag["Pos"][2] >> 4);
-		assert($this->chunk !== null);
-		$this->setLevel($level);
 		$this->server = $level->getServer();
+
+		$this->chunk = $level->getChunkAtPosition($this, true);
+		if($this->chunk === null){
+			throw new \InvalidStateException("Cannot create entities in unloaded chunks");
+		}
+
+		$this->setLevel($level);
 
 		$this->boundingBox = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
 		$this->setPositionAndRotation(

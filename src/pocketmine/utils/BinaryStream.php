@@ -282,28 +282,28 @@ class BinaryStream extends \stdClass {
 	/**
 	 * @param $v
 	 */
-	public function putByte($v){
+	public function putByte($v): void{
 		$this->buffer .= chr($v);
 	}
 
 	/**
 	 * @return UUID
 	 */
-	public function getUUID(){
+	public function getUUID(): UUID{
 		return UUID::fromBinary($this->get(16));
 	}
 
 	/**
 	 * @param UUID $uuid
 	 */
-	public function putUUID(UUID $uuid){
+	public function putUUID(UUID $uuid): void{
 		$this->put($uuid->toBinary());
 	}
 
 	/**
 	 * @return Item
 	 */
-	public function getSlot(){
+	public function getSlot(): Item{
 		$id = $this->getVarInt();
 
 		if($id <= 0){
@@ -344,7 +344,7 @@ class BinaryStream extends \stdClass {
 	/**
 	 * @param Item $item
 	 */
-	public function putSlot(Item $item){
+	public function putSlot(Item $item): void{
 		if($item->getId() === 0){
 			$this->putVarInt(0);
 
@@ -365,14 +365,14 @@ class BinaryStream extends \stdClass {
 	/**
 	 * @return bool|string
 	 */
-	public function getString(){
+	public function getString(): bool{
 		return $this->get($this->getUnsignedVarInt());
 	}
 
 	/**
 	 * @param $v
 	 */
-	public function putString($v){
+	public function putString($v): void{
 		$this->putUnsignedVarInt(strlen($v));
 		$this->put($v);
 	}

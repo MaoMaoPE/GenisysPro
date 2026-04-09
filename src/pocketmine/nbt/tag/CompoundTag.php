@@ -41,7 +41,7 @@ class CompoundTag extends NamedTag implements \ArrayAccess {
 	/**
 	 * @return int
 	 */
-	public function getCount(){
+	public function getCount(): int{
 		$count = 0;
 		foreach($this as $tag){
 			if($tag instanceof Tag){
@@ -57,7 +57,7 @@ class CompoundTag extends NamedTag implements \ArrayAccess {
 	 *
 	 * @return bool
 	 */
-	public function offsetExists($offset){
+	public function offsetExists(mixed $offset): bool{
 		return isset($this->{$offset}) and $this->{$offset} instanceof Tag;
 	}
 
@@ -66,7 +66,7 @@ class CompoundTag extends NamedTag implements \ArrayAccess {
 	 *
 	 * @return null
 	 */
-	public function offsetGet($offset){
+	public function offsetGet(mixed $offset): mixed{
 		if(isset($this->{$offset}) and $this->{$offset} instanceof Tag){
 			if($this->{$offset} instanceof \ArrayAccess){
 				return $this->{$offset};
@@ -82,7 +82,7 @@ class CompoundTag extends NamedTag implements \ArrayAccess {
 	 * @param mixed $offset
 	 * @param mixed $value
 	 */
-	public function offsetSet($offset, $value){
+	public function offsetSet(mixed $offset, mixed $value): void{
 		if($value instanceof Tag){
 			$this->{$offset} = $value;
 		}elseif(isset($this->{$offset}) and $this->{$offset} instanceof Tag){
@@ -93,14 +93,14 @@ class CompoundTag extends NamedTag implements \ArrayAccess {
 	/**
 	 * @param mixed $offset
 	 */
-	public function offsetUnset($offset){
+	public function offsetUnset(mixed $offset): void{
 		unset($this->{$offset});
 	}
 
 	/**
 	 * @return int
 	 */
-	public function getType(){
+	public function getType(): int{
 		return NBT::TAG_Compound;
 	}
 
@@ -110,7 +110,7 @@ class CompoundTag extends NamedTag implements \ArrayAccess {
 	 *
 	 * @return mixed|void
 	 */
-	public function read(NBT $nbt, bool $network = false){
+	public function read(NBT $nbt, bool $network = false): void{
 		$this->value = [];
 		do{
 			$tag = $nbt->readTag($network);
@@ -126,7 +126,7 @@ class CompoundTag extends NamedTag implements \ArrayAccess {
 	 *
 	 * @return mixed|void
 	 */
-	public function write(NBT $nbt, bool $network = false){
+	public function write(NBT $nbt, bool $network = false): void{
 		foreach($this as $tag){
 			if($tag instanceof Tag and !($tag instanceof EndTag)){
 				$nbt->writeTag($tag, $network);

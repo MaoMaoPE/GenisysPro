@@ -32,3 +32,7 @@ Desktop.ini
 /docs/build/
 !/docs/requirements.txt
 .project
+
+# PHP Update
+bin-8.0/*
+bin-8.2/*

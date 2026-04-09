@@ -1269,7 +1269,7 @@ class Item implements ItemIds, \JsonSerializable {
 	/**
 	 * @return array
 	 */
-	final public function jsonSerialize(){
+	final public function jsonSerialize(): mixed{
 		return [
 			"id" => $this->id,
 			"damage" => $this->meta,

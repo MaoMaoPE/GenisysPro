@@ -1011,8 +1011,8 @@ class Level implements ChunkManager, Metadatable
         $randRange = (int)($randRange > $this->chunkTickRadius ? $this->chunkTickRadius : $randRange);
 
         foreach ($this->loaders as $loader) {
-            $chunkX = $loader->getX() >> 4;
-            $chunkZ = $loader->getZ() >> 4;
+            $chunkX = (int)$loader->getX() >> 4;
+            $chunkZ = (int)$loader->getZ() >> 4;
 
             $index = Level::chunkHash($chunkX, $chunkZ);
             $existingLoaders = max(0, isset($this->chunkTickList[$index]) ? $this->chunkTickList[$index] : 0);
@@ -1501,7 +1501,7 @@ class Level implements ChunkManager, Metadatable
         }
 
         $this->timings->setBlock->startTiming();
-        if ($this->getChunk($pos->x >> 4, $pos->z >> 4, true)->setBlock($pos->x & 0x0f, $pos->y & Level::Y_MASK, $pos->z & 0x0f, $block->getId(), $block->getDamage())) {
+        if ($this->getChunkAtPosition($pos, true)->setBlock($pos->x & 0x0f, $pos->y & Level::Y_MASK, $pos->z & 0x0f, $block->getId(), $block->getDamage())) {
             if (!($pos instanceof Position)) {
                 $pos = $this->temporalPosition->setComponents($pos->x, $pos->y, $pos->z);
             }
@@ -2863,7 +2863,7 @@ class Level implements ChunkManager, Metadatable
         if ($spawn instanceof Vector3) {
             $max = $this->provider->getWorldHeight();
             $v = $spawn->floor();
-            $chunk = $this->getChunk($v->x >> 4, $v->z >> 4, false);
+            $chunk = $this->getChunkAtPosition($v, false);
             $x = $v->x & 0x0f;
             $z = $v->z & 0x0f;
             if ($chunk !== null) {
@@ -3142,4 +3142,8 @@ class Level implements ChunkManager, Metadatable
         }
         $this->moveToSend[$index][$entityId] = [$entityId, $x, $y, $z, $yaw, $headYaw === null ? $yaw : $headYaw, $pitch];
     }
+
+	public function getChunkAtPosition(Vector3 $pos, bool $create = false) : ?Chunk{
+		return $this->getChunk($pos->getFloorX() >> 4, $pos->getFloorZ() >> 4, $create);
+	}
 }
