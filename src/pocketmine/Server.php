@@ -321,7 +321,7 @@ class Server{
 	 * @return string
 	 */
 	public function getName() : string{
-        return "GenisysPro";
+        return \pocketmine\POCKETMINE;
 	}
 
 	/**
