@@ -497,4 +497,13 @@ class Binary {
 		}
 		throw new \InvalidArgumentException("Value too large to be encoded as a varint");
 	}
+
+	/**
+	 * @param $value
+	 *
+	 * @return string
+	 */
+	public static function signInt($value) {
+		return $value << 32 >> 32;
+	}
 }

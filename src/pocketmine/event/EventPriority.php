@@ -60,4 +60,13 @@ abstract class EventPriority {
 	 */
 	const MONITOR = 0;
 
+	public static function fromString(string $name) : int{
+		$name = strtoupper($name);
+		$const = self::class . "::" . $name;
+		if($name !== "ALL" and \defined($const)){
+			return \constant($const);
+		}
+
+		throw new \InvalidArgumentException("Unable to resolve priority \"$name\"");
+	}
 }
