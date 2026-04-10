@@ -1,0 +1,281 @@
+<?php
+
+/*
+ *
+ *  ____            _        _   __  __ _                  __  __ ____  
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
+ * 
+ *
+*/
+
+namespace pocketmine\nbt\tag;
+
+use pocketmine\nbt\NBT;
+use pocketmine\nbt\tag\ListTag as TagEnum;
+
+#include <rules/NBT.h>
+
+class ListTag extends NamedTag implements \ArrayAccess, \Countable {
+
+	private $tagType;
+
+	/**
+	 * ListTag constructor.
+	 *
+	 * @param string $name
+	 * @param array  $value
+	 */
+	public function __construct($name = "", $value = []){
+		$this->__name = $name;
+		foreach($value as $k => $v){
+			$this->{$k} = $v;
+		}
+	}
+
+	/**
+	 * @return array
+	 */
+	public function &getValue(): array{
+		$value = [];
+		foreach($this as $k => $v){
+			if($v instanceof Tag){
+				$value[$k] = $v;
+			}
+		}
+
+		return $value;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getCount(): int{
+		$count = 0;
+		foreach($this as $tag){
+			if($tag instanceof Tag){
+				++$count;
+			}
+		}
+
+		return $count;
+	}
+
+	/**
+	 * @param mixed $offset
+	 *
+	 * @return bool
+	 */
+	public function offsetExists(mixed $offset): bool{
+		return isset($this->{$offset});
+	}
+
+	/**
+	 * @param mixed $offset
+	 *
+	 * @return null
+	 */
+	public function offsetGet(mixed $offset): mixed{
+		if(isset($this->{$offset}) and $this->{$offset} instanceof Tag){
+			if($this->{$offset} instanceof \ArrayAccess){
+				return $this->{$offset};
+			}else{
+				return $this->{$offset}->getValue();
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * @param mixed $offset
+	 * @param mixed $value
+	 */
+	public function offsetSet(mixed $offset, mixed $value): void{
+		if($value instanceof Tag){
+			$this->{$offset} = $value;
+		}elseif($this->{$offset} instanceof Tag){
+			$this->{$offset}->setValue($value);
+		}
+	}
+
+	/**
+	 * @param mixed $offset
+	 */
+	public function offsetUnset(mixed $offset): void{
+		unset($this->{$offset});
+	}
+
+	/**
+	 * @param int $mode
+	 *
+	 * @return int
+	 */
+	public function count(int $mode = COUNT_NORMAL): int{
+		for($i = 0; true; $i++){
+			if(!isset($this->{$i})){
+				return $i;
+			}
+			if($mode === COUNT_RECURSIVE){
+				if($this->{$i} instanceof \Countable){
+					$i += count($this->{$i});
+				}
+			}
+		}
+
+		return $i;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getType(): int{
+		return NBT::TAG_List;
+	}
+
+	/**
+	 * @param $type
+	 */
+	public function setTagType($type): void{
+		$this->tagType = $type;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getTagType(): mixed{
+		return $this->tagType;
+	}
+
+	/**
+	 * @param NBT  $nbt
+	 * @param bool $network
+	 *
+	 * @return mixed|void
+	 */
+	public function read(NBT $nbt, bool $network = false): void{
+		$this->value = [];
+		$this->tagType = $nbt->getByte();
+		$size = $nbt->getInt($network);
+		for($i = 0; $i < $size and !$nbt->feof(); ++$i){
+			switch($this->tagType){
+				case NBT::TAG_Byte:
+					$tag = new ByteTag("");
+					$tag->read($nbt, $network);
+					$this->{$i} = $tag;
+					break;
+				case NBT::TAG_Short:
+					$tag = new ShortTag("");
+					$tag->read($nbt, $network);
+					$this->{$i} = $tag;
+					break;
+				case NBT::TAG_Int:
+					$tag = new IntTag("");
+					$tag->read($nbt, $network);
+					$this->{$i} = $tag;
+					break;
+				case NBT::TAG_Long:
+					$tag = new LongTag("");
+					$tag->read($nbt, $network);
+					$this->{$i} = $tag;
+					break;
+				case NBT::TAG_Float:
+					$tag = new FloatTag("");
+					$tag->read($nbt, $network);
+					$this->{$i} = $tag;
+					break;
+				case NBT::TAG_Double:
+					$tag = new DoubleTag("");
+					$tag->read($nbt, $network);
+					$this->{$i} = $tag;
+					break;
+				case NBT::TAG_ByteArray:
+					$tag = new ByteArrayTag("");
+					$tag->read($nbt, $network);
+					$this->{$i} = $tag;
+					break;
+				case NBT::TAG_String:
+					$tag = new StringTag("");
+					$tag->read($nbt, $network);
+					$this->{$i} = $tag;
+					break;
+				case NBT::TAG_List:
+					$tag = new TagEnum("");
+					$tag->read($nbt, $network);
+					$this->{$i} = $tag;
+					break;
+				case NBT::TAG_Compound:
+					$tag = new CompoundTag("");
+					$tag->read($nbt, $network);
+					$this->{$i} = $tag;
+					break;
+				case NBT::TAG_IntArray:
+					$tag = new IntArrayTag("");
+					$tag->read($nbt, $network);
+					$this->{$i} = $tag;
+					break;
+			}
+		}
+	}
+
+	/**
+	 * @param NBT  $nbt
+	 * @param bool $network
+	 *
+	 * @return bool
+	 */
+	public function write(NBT $nbt, bool $network = false): bool{
+		if(!isset($this->tagType)){
+			$id = null;
+			foreach($this as $tag){
+				if($tag instanceof Tag){
+					if(!isset($id)){
+						$id = $tag->getType();
+					}elseif($id !== $tag->getType()){
+						return false;
+					}
+				}
+			}
+			$this->tagType = $id;
+		}
+
+		$nbt->putByte($this->tagType);
+
+		/** @var Tag[] $tags */
+		$tags = [];
+		foreach($this as $tag){
+			if($tag instanceof Tag){
+				$tags[] = $tag;
+			}
+		}
+		$nbt->putInt(count($tags));
+		foreach($tags as $tag){
+			$tag->write($nbt, $network);
+		}
+
+		return true;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function __toString(){
+		$str = get_class($this) . "{\n";
+		foreach($this as $tag){
+			if($tag instanceof Tag){
+				$str .= get_class($tag) . ":" . $tag->__toString() . "\n";
+			}
+		}
+		return $str . "}";
+	}
+}
